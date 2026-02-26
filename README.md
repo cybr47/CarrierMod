@@ -17,4 +17,4 @@ A simple, lightweight LSPosed module to customize carrier name and add lockscree
 3. Tap the **Gear Icon** (⚙️) on the CarrierMod page inside LSPosed to open the settings.
 4. Make your changes, hit Save, and restart SystemUI.
 
-<img width="864" height="1872" alt="Screenshot_20260226-211528" src="https://github.com/user-attachments/assets/318f0b77-f38f-4905-ba67-8083f07de860" />
+<img width="364" height="1102" alt="Screenshot_20260226-211528" src="https://github.com/user-attachments/assets/318f0b77-f38f-4905-ba67-8083f07de860" />
