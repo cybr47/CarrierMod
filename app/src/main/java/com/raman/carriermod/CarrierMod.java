@@ -21,24 +21,14 @@ public class CarrierMod implements IXposedHookLoadPackage {
 
         if (!lpparam.packageName.equals("android") &&
                 !lpparam.packageName.equals("com.android.systemui") &&
-                !lpparam.packageName.equals("com.android.settings")) {
+                !lpparam.packageName.equals("com.android.settings") &&
+                !lpparam.packageName.equals("com.android.phone")) {
             return;
         }
 
         String customCarrier = getSystemProperty("persist.sys.custom_carrier", "");
         if (customCarrier != null && !customCarrier.isEmpty()) {
-            try {
-                XposedHelpers.findAndHookMethod("android.telephony.SubscriptionInfo", lpparam.classLoader,
-                        "getCarrierName", XC_MethodReplacement.returnConstant(customCarrier));
-                XposedHelpers.findAndHookMethod("android.telephony.SubscriptionInfo", lpparam.classLoader,
-                        "getDisplayName", XC_MethodReplacement.returnConstant(customCarrier));
-                XposedHelpers.findAndHookMethod("android.telephony.ServiceState", lpparam.classLoader,
-                        "getOperatorAlphaLong", XC_MethodReplacement.returnConstant(customCarrier));
-                XposedHelpers.findAndHookMethod("android.telephony.ServiceState", lpparam.classLoader,
-                        "getOperatorAlphaShort", XC_MethodReplacement.returnConstant(customCarrier));
-            } catch (Throwable t) {
-                de.robv.android.xposed.XposedBridge.log("CarrierMod Error: " + t.getMessage());
-            }
+            applyCarrierHooks(lpparam, customCarrier);
         }
 
         boolean chargingModEnabled = getSystemProperty("persist.sys.charging_mod", "false").equals("true");
@@ -47,6 +37,22 @@ public class CarrierMod implements IXposedHookLoadPackage {
         }
     }
 
+    private void applyCarrierHooks(LoadPackageParam lpparam, String customCarrier) {
+        try { XposedHelpers.findAndHookMethod("android.telephony.SubscriptionInfo", lpparam.classLoader, "getCarrierName", XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+        try { XposedHelpers.findAndHookMethod("android.telephony.SubscriptionInfo", lpparam.classLoader, "getDisplayName", XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+
+        try { XposedHelpers.findAndHookMethod("android.telephony.ServiceState", lpparam.classLoader, "getOperatorAlphaLong", XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+        try { XposedHelpers.findAndHookMethod("android.telephony.ServiceState", lpparam.classLoader, "getOperatorAlphaShort", XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+
+        try { XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager", lpparam.classLoader, "getNetworkOperatorName", XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+        try { XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager", lpparam.classLoader, "getSimOperatorName", XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+
+        try { XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager", lpparam.classLoader, "getServiceProviderName", XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+        try { XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager", lpparam.classLoader, "getServiceProviderName", int.class, XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+
+        try { XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager", lpparam.classLoader, "getNetworkOperatorName", int.class, XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+        try { XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager", lpparam.classLoader, "getSimOperatorName", int.class, XC_MethodReplacement.returnConstant(customCarrier)); } catch (Throwable t) {}
+    }
     private void hookChargingStats(LoadPackageParam lpparam) {
         XC_MethodHook powerTextHook = new XC_MethodHook() {
             @Override
@@ -103,13 +109,8 @@ public class CarrierMod implements IXposedHookLoadPackage {
             }
         };
 
-        try {
-            XposedHelpers.findAndHookMethod("com.android.systemui.statusbar.KeyguardIndicationController", lpparam.classLoader, "computePowerIndication", powerTextHook);
-        } catch (Throwable t) {}
-
-        try {
-            XposedHelpers.findAndHookMethod("com.google.android.systemui.statusbar.KeyguardIndicationControllerGoogle", lpparam.classLoader, "computePowerIndication", powerTextHook);
-        } catch (Throwable t) {}
+        try { XposedHelpers.findAndHookMethod("com.android.systemui.statusbar.KeyguardIndicationController", lpparam.classLoader, "computePowerIndication", powerTextHook); } catch (Throwable t) {}
+        try { XposedHelpers.findAndHookMethod("com.google.android.systemui.statusbar.KeyguardIndicationControllerGoogle", lpparam.classLoader, "computePowerIndication", powerTextHook); } catch (Throwable t) {}
     }
 
     private String getSystemProperty(String key, String def) {
